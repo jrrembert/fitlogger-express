@@ -3,6 +3,11 @@
 var express = require('express');
 var posts = require('./mock/posts.json');
 
+// Iterate through posts and add to a new array
+var postsLists = Object.keys(posts).map(function(value) {
+	return posts[value];
+})
+
 var app = express();
 
 app.use('/static', express.static(__dirname + '/public'));
@@ -13,6 +18,8 @@ app.set('views', __dirname + '/templates');
 // Route for site root
 // Request = req, response = res per convention
 app.get('/', function(req, res) {
+	var path = req.path;
+	res.locals.path = path  // Exactly same as using { path: path } in render method.
 	res.render('index.jade');
 })
 
@@ -20,7 +27,7 @@ app.get('/blog/:title?', function(req, res) {
     var title = req.params.title;
     if (title === undefined) {
     	res.status(503);
-    	res.send("This page is under construction.");
+    	res.render('blog', { posts: postsLists });
     } else {
     	var post = posts[title] || {};
     	res.render('post', { post: post });
